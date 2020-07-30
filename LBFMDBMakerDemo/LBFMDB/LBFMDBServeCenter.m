@@ -8,11 +8,11 @@
 
 #import "LBFMDBServeCenter.h"
 
-#define DB_PATH(name) [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingString:[NSString stringWithFormat:@"/%@.sqlite",name]]//数据库路径
+#define DB_PATH(name) [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingString:[NSString stringWithFormat:@"/%@.sqlite",name]] //数据库路径
 
 @interface LBFMDBServeCenter()
 {
-    NSMutableDictionary * _queues;//保存项目中已创建的FMDatabaseQueue
+    NSMutableDictionary * _queues;  //保存项目中已创建的FMDatabaseQueue
 }
 @end
 
@@ -37,10 +37,10 @@ static LBFMDBServeCenter * fmdbServeCenter = nil;
     maker(lbDBMaker);
 }
 
-#pragma mark 私有方法
+#pragma mark - private method
 /*
- *创建一个FMDatabaseQueue
- *已经创建的FMDatabaseQueue对象会保存在queues
+ 创建一个FMDatabaseQueue
+ 已经创建的FMDatabaseQueue对象会保存在queues
  */
 -(FMDatabaseQueue*)getDatabaseWithDBName:(NSString*)dbname
 {

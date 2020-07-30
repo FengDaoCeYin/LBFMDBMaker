@@ -154,7 +154,7 @@ typedef enum : NSUInteger {
     [self saveCommon];
     if (_commons.count > 0) {
         [self dbRun:^{
-            handler();
+            if (handler) handler();
             _sqlString = [NSMutableString string];
             [_commons removeAllObjects];
             _resultSet = nil;
@@ -163,9 +163,9 @@ typedef enum : NSUInteger {
     }
 }
 
-#pragma mark 私有方法
+#pragma mark - private method
 /*
- *更新表(增、删、改、查)、创建表
+ 更新表(增、删、改、查)、创建表
  */
 -(void)updataTableWithTableName:(NSString*)tableName SqlStr:(NSString*)sqlStr
 {
@@ -193,7 +193,7 @@ typedef enum : NSUInteger {
 }
 
 /*
- *数据转sql语句字符串
+ 数据转sql语句字符串
  */
 -(NSString*)valueToSqlString:(id)value
 {
@@ -204,7 +204,7 @@ typedef enum : NSUInteger {
 }
 
 /*
- *存储上一条sql语句
+ 存储上一条sql语句
  */
 -(void)saveCommon
 {
@@ -215,7 +215,7 @@ typedef enum : NSUInteger {
 }
 
 /*
- *执行所有已生成并存储的sql语句
+ 执行所有已生成并存储的sql语句
  */
 -(void)dbRun:(void(^)(void))finish
 {

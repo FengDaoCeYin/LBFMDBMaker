@@ -22,9 +22,16 @@
 @implementation ViewController
 
 - (IBAction)inputData:(id)sender {
+    LBFMDBServeCenter * center = [LBFMDBServeCenter sharedFMDBCenter];
     [center operateDBWithDBName:@"3年级五班" lb_makeSQLCommon:^(LBFMDBMaker *maker) {
-        [maker.Table(@"t_person",@[@"name",@"age",@"weight"],@[@0,@1,@2]).Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"小鸡",@18,@73.3]).Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"老牛",@19,@88.6]).Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"大鸭",@16,@50.6]).Select(@"t_person") fire:^{
-            
+        [maker
+        .Table(@"t_person",@[@"name",@"age",@"weight"],@[@0,@1,@2])
+        .Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"小鸡",@18,@73.3])
+        .Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"老牛",@19,@88.6])
+        .Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"大鸭",@16,@50.6]) fire:nil];
+        
+        [maker.Select(@"t_person") fire:^{
+        
             FMResultSet * set = maker.resultSet;
             NSMutableArray * persons = [NSMutableArray array];
             while ([set next]) {
@@ -50,7 +57,11 @@
 
 - (IBAction)updateData:(id)sender {
     [center operateDBWithDBName:@"3年级五班" lb_makeSQLCommon:^(LBFMDBMaker *maker) {
-        [maker.Table(@"t_person",@[@"name",@"age",@"weight"],@[@0,@1,@2]).Update(@"t_person",@"name",_nNameTF.text).Where([NSString stringWithFormat:@"name = '%@'",_oNameTF.text]).Select(@"t_person") fire:^{
+        [maker
+         .Table(@"t_person",@[@"name",@"age",@"weight"],@[@0,@1,@2])
+         .Update(@"t_person",@"name",_nNameTF.text)
+         .Where([NSString stringWithFormat:@"name = '%@'",_oNameTF.text])
+         .Select(@"t_person") fire:^{
             
             FMResultSet * set = maker.resultSet;
             NSMutableArray * persons = [NSMutableArray array];
