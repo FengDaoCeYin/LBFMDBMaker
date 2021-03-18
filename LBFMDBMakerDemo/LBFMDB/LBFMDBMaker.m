@@ -34,14 +34,13 @@ typedef enum : NSUInteger {
     return ^LBFMDBMaker*(NSString* tableName,NSArray<NSString*>*properties,NSArray* propertyTypes){
         
         if (properties.count != propertyTypes.count) {
-            NSLog(@"传参有误！！！");
-            NSLog(@"%s:%d ",__func__, __LINE__);
+            NSLog(@"传参有误！\n方法：%s\nline:%d",__func__, __LINE__);
             return self;
         }
         
         [self saveCommon];
-
-        _sqlString = [NSMutableString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (id integer PRIMARY KEY AUTOINCREMENT,",tableName];
+        
+        _sqlString = [NSMutableString stringWithFormat:@"CREATE TABLE IF NOT EXISTS %@ (private_id integer PRIMARY KEY AUTOINCREMENT,",tableName];
         for (int idx=0; idx<properties.count; idx++) {
             
             [_sqlString appendFormat:@"%@ ",properties[idx]];
@@ -56,7 +55,7 @@ typedef enum : NSUInteger {
                 case LBVALUE_TYPE_DOUBLE:
                     [_sqlString appendString:@"double NOT NULL,"];
                     break;
-                }
+            }
         }
         
         _sqlString = [[_sqlString substringToIndex:_sqlString.length-1] mutableCopy];
@@ -73,8 +72,7 @@ typedef enum : NSUInteger {
     return ^LBFMDBMaker*(NSString*tableName,NSArray<NSString *> *properties, NSArray * values){
         
         if (properties.count != values.count) {
-            NSLog(@"传参有误！！！");
-            NSLog(@"%s:%d ",__func__, __LINE__);
+            NSLog(@"传参有误！\n方法：%s\nline:%d",__func__, __LINE__);
             return self;
         }
         
@@ -88,7 +86,7 @@ typedef enum : NSUInteger {
         }
         _sqlString = [[_sqlString substringToIndex:_sqlString.length-1] mutableCopy];
         [_sqlString appendString:@")"];
-
+        
         valueString = [[valueString substringToIndex:valueString.length-1] mutableCopy];
         [valueString appendString:@")"];
         
@@ -108,7 +106,7 @@ typedef enum : NSUInteger {
         _sqlString = [NSMutableString stringWithFormat:@"DELETE FROM %@",tableName];
         
         _tableName = tableName;
-
+        
         return self;
     };
 }
@@ -122,7 +120,7 @@ typedef enum : NSUInteger {
         _sqlString = [NSMutableString stringWithFormat:@"UPDATE %@ SET %@ = %@",tableName,property,[self valueToSqlString:value]];
         
         _tableName = tableName;
-
+        
         return self;
     };
 }
@@ -149,6 +147,30 @@ typedef enum : NSUInteger {
     };
 }
 
+-(LBFMDBMaker *(^)(NSString *, NSString *, int))addColumn {
+    return ^LBFMDBMaker*(NSString* tableName,NSString* column,int valueType){
+        [self saveCommon];
+        
+        _sqlString = [NSMutableString stringWithFormat:@"ALTER TABLE %@ ADD COLUMN %@",tableName,column];
+        
+        switch (valueType) {
+            case LBVALUE_TYPE_TEXT:
+                [_sqlString appendString:@" text"];
+                break;
+            case LBVALUE_TYPE_INT:
+                [_sqlString appendString:@" integer"];
+                break;
+            case LBVALUE_TYPE_DOUBLE:
+                [_sqlString appendString:@" double"];
+                break;
+        }
+        
+        _tableName = tableName;
+        
+        return self;
+    };
+}
+
 -(void)fire:(void (^)(void))handler
 {
     [self saveCommon];
@@ -167,28 +189,20 @@ typedef enum : NSUInteger {
 /*
  更新表(增、删、改、查)、创建表
  */
--(void)updataTableWithTableName:(NSString*)tableName SqlStr:(NSString*)sqlStr
+-(void)updataTableWithTableName:(NSString*)tableName SqlStr:(NSString*)sqlStr database:(FMDatabase*)db rollback:(BOOL*)rollback
 {
     __block BOOL isSuccess = NO;
-    if (_fmdbQueue) {
-        if ([sqlStr hasPrefix:@"SELECT"]) {
-            [_fmdbQueue inDatabase:^(FMDatabase * _Nonnull db) {
-                _resultSet = [db executeQuery:sqlStr];
-            }];
-        }else{
-            [_fmdbQueue inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollback) {
-                isSuccess = [db executeUpdate:sqlStr];
-                if (isSuccess) {
-                    NSLog(@"updata:更新表-->%@成功",tableName);
-                }else{
-                    NSLog(@"updata:更新表-->%@失败",tableName);
-                    NSLog(@"%s:%d ",__func__, __LINE__);
-                }
-            }];
-        }
+    
+    if ([sqlStr hasPrefix:@"SELECT"]) {
+        _resultSet = [db executeQuery:sqlStr];
     }else{
-        NSLog(@"updata:获取数据库失败");
-        NSLog(@"%s:%d ",__func__, __LINE__);
+        isSuccess = [db executeUpdate:sqlStr];
+        if (isSuccess) {
+            NSLog(@"成功\n%@",sqlStr);
+        }else{
+            *rollback = YES;
+            NSLog(@"失败\n%@",sqlStr);
+        }
     }
 }
 
@@ -219,11 +233,19 @@ typedef enum : NSUInteger {
  */
 -(void)dbRun:(void(^)(void))finish
 {
-    for (int idx = 0; idx<_commons.count; idx++) {
-        NSString * sqlcommon = _commons[idx];
-
-        [self updataTableWithTableName:_tableName SqlStr:sqlcommon];
+    @try {
+        [_fmdbQueue inTransaction:^(FMDatabase * _Nonnull db, BOOL * _Nonnull rollback) {
+            for (int idx = 0; idx<_commons.count; idx++) {
+                NSString * sqlcommon = _commons[idx];
+                
+                [self updataTableWithTableName:_tableName SqlStr:sqlcommon database:db rollback:rollback];
+            }
+        }];
+    } @catch (NSException *exception) {
+        NSLog(@"updata:获取数据库失败");
+        NSLog(@"%s\nline:%d ",__func__, __LINE__);
+    } @finally {
+        finish();
     }
-    finish();
 }
 @end

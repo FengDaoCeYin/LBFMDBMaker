@@ -27,69 +27,90 @@
 
 /*
  创建表(如果表存在，则直接操作)
- @param:
+ param:
     tableName:表名
     properties:表属性名
     propertyTypes:表属性类型(1=text,2=int,3=double)，可拓展，与.m文件的LBVALUE_TYPE对应
- @tips：
-    properties、propertyTypes需要一一对应
+ tips：
+    properties、propertyTypes需要对应
  */
 -(LBFMDBMaker*(^)(NSString*tableName,NSArray<NSString*>* properties,NSArray* propertyTypes))Table;
 
 /*
  插入数据
- @param：
+ param：
     tableName:表名
     properties:表属性名
     values:属性对应的值
- @tips：
-    properties、values需要一一对应
+ tips：
+    properties、values需要对应
  */
 -(LBFMDBMaker*(^)(NSString*tableName,NSArray<NSString*>* properties,NSArray* values))Insert;
 
 /*
  删除数据
- @param：
+ param：
     tableName:表名
- @tips：
+ tips：
     需要与Where配合使用，完善查询条件
  */
 -(LBFMDBMaker*(^)(NSString*tableName))Delete;
 
 /*
  更新数据
- @param：
+ param：
     tableName:表名
     property:更新的属性
     value:更新的值
- @tips：
+ tips：
     需要与Where配合使用，完善查询条件
  */
 -(LBFMDBMaker*(^)(NSString*tableName,NSString*property,id value))Update;
 
 /*
- 查询条件
- @param：
+ 条件
+ param：
     termStr:条件语句
- @tips：
+ tips：
     需自行写正确的sql语句，例如查age属性为18的人，就听该传入"age = 18"
  */
 -(LBFMDBMaker*(^)(NSString*termStr))Where;
 
 /*
  查询表
- @param：
+ param：
     tableName:表名
- @tips：
+ tips：
     可与Where配合使用
  */
 -(LBFMDBMaker*(^)(NSString*tableName))Select;
 
 /*
- 开启数据库操作
- @param：
+ 增加键
+ param：
+    tableName:表名
+ tips：
+    可与Where配合使用
+ */
+-(LBFMDBMaker*(^)(NSString*tableName,NSString*column,int valueYype))addColumn;
+
+/*
+ 数据迁移
+ param：
+    tableName:表名
+    new_properties:新键名称
+    new_propertyTypes:新键类型
+    old_properties:旧键名称
+ tips：
+    旧键与新键对应。例：INSERT INTO 新表 (id, Name) SELECT Id, Title FROM 旧表;
+ */
+-(LBFMDBMaker*(^)(NSString*tableName,NSArray<NSString*>*new_properties,NSArray*new_propertyTypes,NSArray<NSString*>*old_properties))aaa;
+
+/*
+ 开始执行数据库操作
+ param：
     handler:数据库操作完毕给业务类的回执
- @tips：
+ tips：
     执行此次链式操作生成的所有sql语句。此函数也代表一次链式操作的终结，执行完毕后会清空除fmdbQueue的所有属性。
  */
 -(void)fire:(void(^)(void))handler;

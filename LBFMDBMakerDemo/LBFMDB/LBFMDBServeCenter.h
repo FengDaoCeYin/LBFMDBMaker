@@ -21,7 +21,7 @@
 
 /*
  选择要操作的数据库，没有直接创建
- @param：
+ param：
     dbname:数据库名称
     maker:用以与业务类通讯的block
  */
