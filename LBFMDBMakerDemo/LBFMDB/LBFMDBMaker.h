@@ -104,7 +104,7 @@
  tips：
     旧键与新键对应。例：INSERT INTO 新表 (id, Name) SELECT Id, Title FROM 旧表;
  */
--(LBFMDBMaker*(^)(NSString*tableName,NSArray<NSString*>*new_properties,NSArray*new_propertyTypes,NSArray<NSString*>*old_properties))aaa;
+-(LBFMDBMaker*(^)(NSString*tableName,NSArray<NSString*>*new_properties,NSArray*new_propertyTypes,NSArray<NSString*>*old_properties))DataMove;
 
 /*
  开始执行数据库操作
