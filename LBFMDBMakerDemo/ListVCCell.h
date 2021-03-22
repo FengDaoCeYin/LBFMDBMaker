@@ -10,8 +10,6 @@
 
 @interface ListVCCell : UITableViewCell
 @property (weak, nonatomic) IBOutlet UILabel *IDLabel;
-@property (weak, nonatomic) IBOutlet UILabel *nameLabel;
-@property (weak, nonatomic) IBOutlet UILabel *ageLabel;
-@property (weak, nonatomic) IBOutlet UILabel *weightLabel;
+
 @property(nonatomic,copy)NSDictionary* cellData;
 @end

@@ -11,86 +11,139 @@
 #import "LBFMDBServeCenter.h"
 
 @interface ViewController ()
-{
-    LBFMDBServeCenter * center;
-}
-@property (weak, nonatomic) IBOutlet UITextField *oNameTF;
-@property (weak, nonatomic) IBOutlet UITextField *nNameTF;
 
 @end
 
 @implementation ViewController
 
-- (IBAction)inputData:(id)sender {
-    LBFMDBServeCenter * center = [LBFMDBServeCenter sharedFMDBCenter];
-    [center operateDBWithDBName:@"3年级五班" lb_makeSQLCommon:^(LBFMDBMaker *maker) {
-        [maker
-        .Table(@"t_person",@[@"name",@"age",@"weight"],@[@0,@1,@2])
-        .Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"小鸡",@18,@73.3])
-        .Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"老牛",@19,@88.6])
-        .Insert(@"t_person",@[@"name",@"age",@"weight"],@[@"大鸭",@16,@50.6]) fire:nil];
+// 1.创建“动物学校”数据库
+-(void)createDB {
+    [LBFMDBServeCenter.sharedFMDBCenter operateDBWithName:@"动物学校" commonMaker:nil];
+}
+
+// 2.创建“三年二班”表,并录入两个同学的信息
+-(void)createClass {
+    [LBFMDBServeCenter.sharedFMDBCenter operateDBWithName:@"动物学校" commonMaker:^(LBFMDBMaker *dbmaker) {
         
-        [maker.Select(@"t_person") fire:^{
+        NSDictionary * classTable =
+        @{
+            @"name":@"三年二班",
+            @"properties":
+                @{
+                    @"name":@"string",
+                    @"age":@"int",
+                    @"height":@"double",
+                    @"carnivorous":@"bool"
+                }
+        };
         
-            FMResultSet * set = maker.resultSet;
-            NSMutableArray * persons = [NSMutableArray array];
-            while ([set next]) {
-                int ID = [set intForColumnIndex:0];
-                NSString * name = [set stringForColumnIndex:1];
-                int age = [set intForColumnIndex:2];
-                double weight = [set doubleForColumnIndex:3];
+        NSDictionary * student1 =
+        @{
+            @"name":@"虎子",
+            @"age":@6,
+            @"height":@118.73,
+            @"carnivorous":@YES
+        };
+        
+        NSDictionary * student2 =
+        @{
+            @"name":@"咩咩",
+            @"age":@3,
+            @"height":@67,
+            @"carnivorous":@NO
+        };
+        
+        [dbmaker
+         .createTable(classTable)
+         .insert(@"三年二班",student1)
+         .insert(@"三年二班",student2) fire:nil];
+    }];
+}
+
+// 3.学校要求同学要把户籍也加上
+-(void)addAdress {
+    [LBFMDBServeCenter.sharedFMDBCenter operateDBWithName:@"动物学校" commonMaker:^(LBFMDBMaker *dbmaker) {
+        [dbmaker
+         .addColumn(@"三年二班",@"adress",@"string")
+         .update(@"三年二班",@"adress",@"东北")
+         .where(@"name = '虎子'")
+         .update(@"三年二班",@"adress",@"美丽的草原")
+         .where(@"name = '咩咩'") fire:nil];
+    }];
+}
+
+// 4.由于老师的粗心，把户籍写成了“adress“。现在要求改正。
+-(void)changeColumn {
+    [LBFMDBServeCenter.sharedFMDBCenter operateDBWithName:@"动物学校" commonMaker:^(LBFMDBMaker *dbmaker) {
+        NSDictionary * classTable =
+        @{
+            @"name":@"三年二班",
+            @"properties":
+                @{
+                    @"name":@"string",
+                    @"age":@"int",
+                    @"height":@"double",
+                    @"carnivorous":@"bool",
+                    @"address":@"string"
+                }
+        };
+        
+        NSDictionary * relation =
+        @{
+            @"name":@"name",
+            @"age":@"age",
+            @"height":@"height",
+            @"carnivorous":@"carnivorous",
+            @"address":@"adress"  // 有变化的column
+        };
+        
+        [dbmaker
+         .dataMove(classTable,relation,2) fire:nil];
+    }];
+}
+
+// 5.统计本班同学
+-(void)census {
+    [LBFMDBServeCenter.sharedFMDBCenter operateDBWithName:@"动物学校" commonMaker:^(LBFMDBMaker *dbmaker) {
+        [dbmaker
+         .select(@"三年二班") fire:^{
+            NSMutableArray * students = [NSMutableArray array];
+            FMResultSet * resultSet = dbmaker.resultSet;
+            while ([resultSet next]) {
+                NSMutableDictionary * student = [NSMutableDictionary dictionary];
+                [student setValue:[resultSet stringForColumn:@"name"] forKey:@"name"];
+                [student setValue:@([resultSet intForColumn:@"age"]) forKey:@"age"];
+                [student setValue:@([resultSet doubleForColumn:@"height"]) forKey:@"height"];
+                [student setValue:@([resultSet boolForColumn:@"carnivorous"]) forKey:@"carnivorous"];
+                [student setValue:[resultSet stringForColumn:@"address"] forKey:@"address"];
                 
-                NSMutableDictionary * person = [NSMutableDictionary dictionary];
-                [person setValue:[NSString stringWithFormat:@"%d",ID] forKey:@"ID"];
-                [person setValue:name forKey:@"name"];
-                [person setValue:[NSString stringWithFormat:@"%d",age] forKey:@"age"];
-                [person setValue:[NSString stringWithFormat:@"%.2f",weight] forKey:@"weight"];
-                
-                [persons addObject:person];
+                [students addObject:student];
             }
-            ListViewController * listVC = [[ListViewController alloc]init];
-            listVC.persons = persons;
+            
+            ListViewController * listVC = [[ListViewController alloc] init];
+            listVC.dataArr = students;
             [self.navigationController pushViewController:listVC animated:YES];
         }];
     }];
 }
 
-- (IBAction)updateData:(id)sender {
-    [center operateDBWithDBName:@"3年级五班" lb_makeSQLCommon:^(LBFMDBMaker *maker) {
-        [maker
-         .Table(@"t_person",@[@"name",@"age",@"weight"],@[@0,@1,@2])
-         .Update(@"t_person",@"name",_nNameTF.text)
-         .Where([NSString stringWithFormat:@"name = '%@'",_oNameTF.text])
-         .Select(@"t_person") fire:^{
-            
-            FMResultSet * set = maker.resultSet;
-            NSMutableArray * persons = [NSMutableArray array];
-            while ([set next]) {
-                int ID = [set intForColumnIndex:0];
-                NSString * name = [set stringForColumnIndex:1];
-                int age = [set intForColumnIndex:2];
-                double weight = [set doubleForColumnIndex:3];
-                
-                NSMutableDictionary * person = [NSMutableDictionary dictionary];
-                [person setValue:[NSString stringWithFormat:@"%d",ID] forKey:@"id"];
-                [person setValue:name forKey:@"name"];
-                [person setValue:[NSString stringWithFormat:@"%d",age] forKey:@"age"];
-                [person setValue:[NSString stringWithFormat:@"%.2f",weight] forKey:@"weight"];
-                
-                [persons addObject:person];
-            }
-            ListViewController * listVC = [[ListViewController alloc]init];
-            listVC.persons = persons;
-            [self.navigationController pushViewController:listVC animated:YES];
-        }];
+// 6.学校要求分班，把吃素的、吃荤的分开
+-(void)deleteData {
+    [LBFMDBServeCenter.sharedFMDBCenter operateDBWithName:@"动物学校" commonMaker:^(LBFMDBMaker *dbmaker) {
+        [dbmaker
+         .deleteData(@"三年二班")
+         .where(@"carnivorous = 1") fire:nil];
     }];
 }
+
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    center = [LBFMDBServeCenter sharedFMDBCenter];
-
+    
+    [self changeColumn];
+    
+    NSLog(@"%@",[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject]);
+    
 }
 
 

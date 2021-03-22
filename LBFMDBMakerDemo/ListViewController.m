@@ -27,13 +27,13 @@
 
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return self.persons.count;
+    return self.dataArr.count;
 }
 
 -(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     ListVCCell * cell = [tableView dequeueReusableCellWithIdentifier:@"ListVCCell"];
-    cell.cellData = _persons[indexPath.row];
+    cell.cellData = _dataArr[indexPath.row];
     return cell;
 }
 

@@ -14,17 +14,18 @@
 #import "LBFMDBMaker.h"
 
 @interface LBFMDBServeCenter : NSObject
+
 /*
- 项目所有数据库的操控中心(单例)
+ * 项目所有数据库的操控中心(单例)
  */
 +(id)sharedFMDBCenter;
 
 /*
- 选择要操作的数据库，没有直接创建
- param：
-    dbname:数据库名称
-    maker:用以与业务类通讯的block
+ * 选择要操作的数据库，没有则直接创建
+ * param：
+ *   dbname:数据库名称
+ *   maker:用以与业务类通讯的block
  */
--(void)operateDBWithDBName:(NSString*)dbname lb_makeSQLCommon:(void(^)(LBFMDBMaker*))maker;
+-(void)operateDBWithName:(NSString*)dbname commonMaker:(void(^)(LBFMDBMaker*))maker;
 
 @end

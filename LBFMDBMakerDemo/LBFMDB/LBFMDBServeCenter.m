@@ -12,7 +12,7 @@
 
 @interface LBFMDBServeCenter()
 {
-    NSMutableDictionary * _queues;  //保存项目中已创建的FMDatabaseQueue
+    NSMutableDictionary * _queues;  //存放数据库
 }
 @end
 
@@ -29,18 +29,17 @@ static LBFMDBServeCenter * fmdbServeCenter = nil;
     return fmdbServeCenter;
 }
 
--(void)operateDBWithDBName:(NSString *)dbname lb_makeSQLCommon:(void (^)(LBFMDBMaker *))maker
+-(void)operateDBWithName:(NSString *)dbname commonMaker:(void (^)(LBFMDBMaker *))maker
 {
     FMDatabaseQueue * opFmdbQueue = [self getDatabaseWithDBName:dbname];
     LBFMDBMaker * lbDBMaker = [[LBFMDBMaker alloc] init];
     lbDBMaker.fmdbQueue = opFmdbQueue;
-    maker(lbDBMaker);
+    if (maker) maker(lbDBMaker);
 }
 
 #pragma mark - private method
 /*
- 创建一个FMDatabaseQueue
- 已经创建的FMDatabaseQueue对象会保存在queues
+ * 创建一个FMDatabaseQueue，并存储在本地
  */
 -(FMDatabaseQueue*)getDatabaseWithDBName:(NSString*)dbname
 {

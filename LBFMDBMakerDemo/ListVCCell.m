@@ -13,10 +13,7 @@
 -(void)setCellData:(NSDictionary *)cellData
 {
     _cellData = cellData;
-    _IDLabel.text = cellData[@"ID"];
-    _nameLabel.text = cellData[@"name"];
-    _ageLabel.text = cellData[@"age"];
-    _weightLabel.text = cellData[@"weight"];
+    _IDLabel.text = [NSString stringWithFormat:@"姓名:%@ 年龄:%d 身高:%fcm 吃素:%d 地址:%@",_cellData[@"name"],[_cellData[@"age"] intValue],[_cellData[@"height"] doubleValue],![_cellData[@"carnivorous"] boolValue],_cellData[@"address"]];
 }
 - (void)awakeFromNib {
     [super awakeFromNib];

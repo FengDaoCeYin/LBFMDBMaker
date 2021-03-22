@@ -9,5 +9,5 @@
 #import <UIKit/UIKit.h>
 
 @interface ListViewController : UIViewController
-@property(nonatomic,copy)NSArray* persons;
+@property(nonatomic,copy)NSArray* dataArr;
 @end
