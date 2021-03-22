@@ -140,7 +140,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self changeColumn];
+    [self createDB];
     
     NSLog(@"%@",[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject]);
     
