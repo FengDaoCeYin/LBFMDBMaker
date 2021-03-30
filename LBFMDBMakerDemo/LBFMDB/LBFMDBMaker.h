@@ -7,7 +7,7 @@
 //
 //此类是数据库操作类，根据链式编程思想，将sql语句的动态生成、及数据库操作交由此类处理。
 //目前只实现了简单的数据库操作(增、删、改、查、数据迁移、添加键)，后续可根据情况自行拓展。
-//毕竟重点只是体现思路而已，因此会存在不完善，或者漏洞，望见谅！
+//毕竟重点只是体现思路而已，设计会存在不完善，望见谅！
 //注：Warning: there is at least one open result set around after performing [FMDatabaseQueue inDatabase:]警告可忽略，resultSet会在数据库关闭时关闭。
 //可对.m文件中的checkValueType函数进行拓展，增加数据库存储的数据类型。
 //

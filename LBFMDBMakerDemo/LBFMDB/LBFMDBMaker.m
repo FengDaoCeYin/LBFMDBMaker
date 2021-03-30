@@ -164,6 +164,8 @@
         }
         else if ([columnType.lowercaseString isEqualToString:@"bool"]){
             [_sqlString appendString:@"bool"];
+        } else {
+            [_sqlString appendFormat:@"%@",columnType];
         }
         
         _tableName = tableName;
@@ -256,6 +258,8 @@
     }
     else if ([value.lowercaseString isEqualToString:@"bool"]){
         [SQLStr appendString:@"bool NOT NULL,"];
+    } else {
+        [SQLStr appendFormat:@"%@ NOT NULL",SQLStr];
     }
 }
 
@@ -272,10 +276,10 @@
     }else{
         isSuccess = [db executeUpdate:sqlStr];
         if (isSuccess) {
-            NSLog(@"成功\n%@",sqlStr);
+//            NSLog(@"========LBFMDBMaker log========\n操作成功\n%@",sqlStr);
         }else{
             *rollback = YES;
-            NSLog(@"失败\n%@",sqlStr);
+            NSLog(@"========LBFMDBMaker log========\n操作失败\n%@",sqlStr);
         }
     }
 }
@@ -316,8 +320,8 @@
             }
         }];
     } @catch (NSException *exception) {
-        NSLog(@"updata:获取数据库失败");
-        NSLog(@"%s\nline:%d ",__func__, __LINE__);
+        NSLog(@"========LBFMDBMaker log========\n数据库操作失败");
+        NSLog(@"========LBFMDBMaker log========\n%s\nline:%d ",__func__, __LINE__);
     } @finally {
         finish();
     }
