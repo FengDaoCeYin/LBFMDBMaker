@@ -10,6 +10,7 @@
 
 @interface LBFMDBMaker()
 @property(nonatomic,copy)NSString* tableName; // 当前正在操作的表名
+@property(nonatomic,assign)BOOL hasFire;      // 是否已经执行过操作链
 @end
 @implementation LBFMDBMaker
 
@@ -19,6 +20,7 @@
     if (self) {
         _sqlString = [NSMutableString string];
         _commons = [NSMutableArray array];
+        _hasFire = NO;
     }
     return self;
 }
@@ -221,6 +223,8 @@
         // Step 5.删除重命名的表
         [_commons addObject:[NSString stringWithFormat:@"DROP TABLE %@_old;",table[@"name"]]];
         
+        // Step 6.更新数据库版本
+        self.insert(@"DBVersion",@{@"version":@(newVersion)});
         
         _tableName = table[@"name"];
         
@@ -230,10 +234,14 @@
 
 -(void)fire:(void (^)(void))handler
 {
+    if (_hasFire) @throw [NSException exceptionWithName:@"数据库操作错误" reason:@"重复调用fire函数。" userInfo:nil];
     [self saveCommon];
     if (_commons.count > 0) {
         [self dbRun:^{
-            if (handler) handler();
+            if (handler) {
+                _hasFire = YES;
+                handler();
+            }
             _sqlString = [NSMutableString string];
             [_commons removeAllObjects];
             _resultSet = nil;
