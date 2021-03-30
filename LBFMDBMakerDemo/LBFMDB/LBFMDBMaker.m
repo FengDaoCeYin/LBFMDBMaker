@@ -16,8 +16,7 @@
 
 -(instancetype)init
 {
-    self = [super init];
-    if (self) {
+    if (self = [super init]) {
         _sqlString = [NSMutableString string];
         _commons = [NSMutableArray array];
         _hasFire = NO;
@@ -238,14 +237,10 @@
     [self saveCommon];
     if (_commons.count > 0) {
         [self dbRun:^{
+            _hasFire = YES;
             if (handler) {
-                _hasFire = YES;
                 handler();
             }
-            _sqlString = [NSMutableString string];
-            [_commons removeAllObjects];
-            _resultSet = nil;
-            _tableName = nil;
         }];
     }
 }
@@ -334,4 +329,5 @@
         finish();
     }
 }
+
 @end
