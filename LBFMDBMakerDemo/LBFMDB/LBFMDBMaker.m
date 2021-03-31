@@ -157,7 +157,7 @@
         if ([columnType.lowercaseString isEqualToString:@"string"]) {
             [_sqlString appendString:@"text"];
         }
-        else if ([columnType.lowercaseString isEqualToString:@"int"]){
+        else if ([columnType.lowercaseString isEqualToString:@"int"] || [columnType.lowercaseString isEqualToString:@"long"] || [columnType.lowercaseString isEqualToString:@"longlong"]){
             [_sqlString appendString:@"integer"];
         }
         else if ([columnType.lowercaseString isEqualToString:@"double"]){
@@ -253,7 +253,7 @@
     if ([value.lowercaseString isEqualToString:@"string"]) {
         [SQLStr appendString:@"text NOT NULL,"];
     }
-    else if ([value.lowercaseString isEqualToString:@"int"]){
+    else if ([value.lowercaseString isEqualToString:@"int"] || [value.lowercaseString isEqualToString:@"long"] || [value.lowercaseString isEqualToString:@"longlong"]){
         [SQLStr appendString:@"integer NOT NULL,"];
     }
     else if ([value.lowercaseString isEqualToString:@"double"]){
@@ -279,7 +279,7 @@
     }else{
         isSuccess = [db executeUpdate:sqlStr];
         if (isSuccess) {
-//            NSLog(@"========LBFMDBMaker log========\n操作成功\n%@",sqlStr);
+            NSLog(@"========LBFMDBMaker log========\n操作成功\n%@",sqlStr);
         }else{
             *rollback = YES;
             NSLog(@"========LBFMDBMaker log========\n操作失败\n%@",sqlStr);
